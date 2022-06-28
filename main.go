@@ -96,6 +96,16 @@ func main() {
 				c.JSON(http.StatusOK, gin.H{"data": data})
 			}
 		})
+
+		apiV1.POST("/wallet/:wallet_id/token/delete", func(c *gin.Context) {
+			walletController.DeleteToken(c)
+			c.JSON(http.StatusOK, gin.H{})
+		})
+		apiV1.POST("/wallet/:wallet_id/:token/position/delete", func(c *gin.Context) {
+			walletController.DeletePosition(c)
+			c.JSON(http.StatusOK, gin.H{})
+		})
+
 	}
 	err = r.Run("localhost:8080")
 	if err != nil {

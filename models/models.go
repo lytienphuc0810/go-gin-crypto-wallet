@@ -19,7 +19,7 @@ type Wallet struct {
 
 type Token struct {
 	gorm.Model
-	WalletID    uint   `gorm:"index:wallet_token,unique"`
+	WalletID    uint   `gorm:"index:wallet_token,unique;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Symbol      string `gorm:"index:wallet_token,unique"`
 	Name        string
 	Description string
@@ -27,7 +27,7 @@ type Token struct {
 
 type Position struct {
 	gorm.Model
-	TokenID uint
+	TokenID uint `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Amount  float64
 	Note    string
 }

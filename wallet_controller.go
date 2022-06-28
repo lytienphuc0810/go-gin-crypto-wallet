@@ -11,12 +11,14 @@ import (
 )
 
 type TokenResponse struct {
+	ID          uint               `json:"id"`
 	Symbol      string             `json:"symbol"`
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
 	Positions   []PositionResponse `json:"positions"`
 }
 type PositionResponse struct {
+	ID        uint      `json:"id"`
 	Amount    float64   `json:"amount"`
 	Note      string    `json:"description"`
 	CreatedAt time.Time `json:"createdAt"`
@@ -34,6 +36,14 @@ type WalletControllerAddTokenRequest struct {
 	Symbol      string `json:"symbol" binding:"required"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
+}
+
+type WalletControllerDeleteTokenRequest struct {
+	ID uint `json:"id" binding:"required"`
+}
+
+type WalletControllerDeletePositionRequest struct {
+	ID uint `json:"id" binding:"required"`
 }
 
 type WalletControllerAddPositionRequest struct {
@@ -99,7 +109,6 @@ func (controller *WalletController) AddToken(c *gin.Context) interface{} {
 	result := controller.db.Where("username = ?", userPrincipal.(*User).UserName).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		log.Panicln(result.Error.Error())
-		return nil
 	}
 
 	walletID, _ := strconv.Atoi(c.Param("wallet_id"))
@@ -107,13 +116,11 @@ func (controller *WalletController) AddToken(c *gin.Context) interface{} {
 	result = controller.db.Where("id = ? AND user_id = ?", walletID, user.ID).First(&wallet)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		log.Panicln(result.Error.Error())
-		return nil
 	}
 
 	request := WalletControllerAddTokenRequest{}
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Panicln(err.Error())
-		return nil
 	}
 
 	token := models.Token{
@@ -125,7 +132,6 @@ func (controller *WalletController) AddToken(c *gin.Context) interface{} {
 	result = controller.db.Create(&token)
 	if result.Error != nil {
 		log.Panicln(result.Error.Error())
-		return nil
 	}
 	return token
 }
@@ -137,7 +143,6 @@ func (controller *WalletController) AddPosition(c *gin.Context) interface{} {
 	result := controller.db.Where("username = ?", userPrincipal.(*User).UserName).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		log.Panicln(result.Error.Error())
-		return nil
 	}
 
 	walletID, _ := strconv.Atoi(c.Param("wallet_id"))
@@ -145,21 +150,18 @@ func (controller *WalletController) AddPosition(c *gin.Context) interface{} {
 	result = controller.db.Where("id = ? AND user_id = ?", walletID, user.ID).First(&wallet)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		log.Panicln(result.Error.Error())
-		return nil
 	}
 
 	request := WalletControllerAddPositionRequest{}
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Panicln(err.Error())
-		return nil
 	}
 
 	token := c.Param("token")
 	var tokenModel models.Token
-	result = controller.db.Where("symbol = ?", token).First(&tokenModel)
+	result = controller.db.Where("symbol = ? AND wallet_id", token, walletID).First(&tokenModel)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		log.Panicln(result.Error.Error())
-		return nil
 	}
 
 	position := models.Position{
@@ -170,9 +172,65 @@ func (controller *WalletController) AddPosition(c *gin.Context) interface{} {
 	result = controller.db.Create(&position)
 	if result.Error != nil {
 		log.Panicln(result.Error.Error())
-		return nil
 	}
 	return position
+}
+
+func (controller *WalletController) DeleteToken(c *gin.Context) interface{} {
+	userPrincipal, _ := c.Get(identityKey)
+
+	var user models.User
+	result := controller.db.Where("username = ?", userPrincipal.(*User).UserName).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Panicln(result.Error.Error())
+	}
+
+	walletID, _ := strconv.Atoi(c.Param("wallet_id"))
+	var wallet models.Wallet
+	result = controller.db.Where("id = ? AND user_id = ?", walletID, user.ID).First(&wallet)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Panicln(result.Error.Error())
+	}
+
+	request := WalletControllerDeleteTokenRequest{}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Panicln(err.Error())
+	}
+
+	controller.db.Unscoped().Where("id = ? AND wallet_id = ?", request.ID, walletID).Delete(&models.Token{})
+	return nil
+}
+
+func (controller *WalletController) DeletePosition(c *gin.Context) interface{} {
+	userPrincipal, _ := c.Get(identityKey)
+
+	var user models.User
+	result := controller.db.Where("username = ?", userPrincipal.(*User).UserName).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Panicln(result.Error.Error())
+	}
+
+	walletID, _ := strconv.Atoi(c.Param("wallet_id"))
+	var wallet models.Wallet
+	result = controller.db.Where("id = ? AND user_id = ?", walletID, user.ID).First(&wallet)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Panicln(result.Error.Error())
+	}
+
+	token := c.Param("token")
+	var tokenModel models.Token
+	result = controller.db.Where("symbol = ? AND wallet_id = ?", token, walletID).First(&tokenModel)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Panicln(result.Error.Error())
+	}
+
+	request := WalletControllerDeletePositionRequest{}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Panicln(err.Error())
+	}
+
+	controller.db.Unscoped().Where("id = ? AND token_id = ?", request.ID, tokenModel.ID).Delete(&models.Position{})
+	return nil
 }
 
 func (controller *WalletController) convertTokens(tokens []models.Token) []TokenResponse {
@@ -184,6 +242,7 @@ func (controller *WalletController) convertTokens(tokens []models.Token) []Token
 		controller.db.Where("token_id = ?", token.ID).Find(&positions)
 
 		result = append(result, TokenResponse{
+			ID:          token.ID,
 			Symbol:      token.Symbol,
 			Name:        token.Name,
 			Description: token.Symbol,
@@ -197,6 +256,7 @@ func (controller *WalletController) convertPositions(positions []models.Position
 	result := make([]PositionResponse, 0)
 	for _, position := range positions {
 		result = append(result, PositionResponse{
+			ID:        position.ID,
 			Amount:    position.Amount,
 			Note:      position.Note,
 			CreatedAt: position.CreatedAt,
