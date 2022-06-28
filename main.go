@@ -28,6 +28,9 @@ func main() {
 	if len(argsWithoutProg) >= 1 && argsWithoutProg[0] == "migrate" {
 		db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		db.AutoMigrate(&models.User{})
+		db.AutoMigrate(&models.Wallet{})
+		db.AutoMigrate(&models.Token{})
+		db.AutoMigrate(&models.Position{})
 		db.Unscoped().Where("deleted_at IS NULL").Delete(&models.User{})
 		db.Create(&models.User{
 			Username: "test1",
@@ -58,16 +61,15 @@ func main() {
 	apiV1.Use(MiddleWare(), authMidlw)
 	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	var userController = NewUserController(db)
+	var walletController = NewWalletController(db)
 	{
 		apiV1.GET("/profile", func(c *gin.Context) {
-			var data = userController.Get(c)
-			c.JSON(http.StatusOK, gin.H{
-				"data": *data,
-			})
+			var profile = userController.Get(c)
+			c.JSON(http.StatusOK, gin.H{"profile": profile})
 		})
-
 		apiV1.GET("/wallet", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{})
+			var wallet = walletController.Get(c)
+			c.JSON(http.StatusOK, gin.H{"wallet": wallet})
 		})
 		apiV1.POST("/token", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{})
