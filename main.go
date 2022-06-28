@@ -62,20 +62,39 @@ func main() {
 	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	var userController = NewUserController(db)
 	var walletController = NewWalletController(db)
+
 	{
 		apiV1.GET("/profile", func(c *gin.Context) {
 			var profile = userController.Get(c)
-			c.JSON(http.StatusOK, gin.H{"profile": profile})
+			if profile == nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"profile": profile})
+			}
 		})
 		apiV1.GET("/wallet", func(c *gin.Context) {
 			var wallet = walletController.Get(c)
-			c.JSON(http.StatusOK, gin.H{"wallet": wallet})
+			if wallet == nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"wallet": wallet})
+			}
 		})
-		apiV1.POST("/token", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{})
+		apiV1.POST("/wallet/:wallet_id/token", func(c *gin.Context) {
+			var data = walletController.AddToken(c)
+			if data == nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"data": data})
+			}
 		})
-		apiV1.POST("/position", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{})
+		apiV1.POST("/wallet/:wallet_id/:token/position", func(c *gin.Context) {
+			var data = walletController.AddPosition(c)
+			if data == nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+			} else {
+				c.JSON(http.StatusOK, gin.H{"data": data})
+			}
 		})
 	}
 	err = r.Run("localhost:8080")
