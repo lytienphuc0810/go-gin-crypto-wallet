@@ -3,6 +3,10 @@
 	{
 		"selected_items":
 		[
+			[
+				"for",
+				"fori"
+			]
 		]
 	},
 	"buffers":
@@ -19,6 +23,34 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"rein",
+				"Indentation: Reindent Lines"
+			],
+			[
+				"1",
+				"Text Pastry: From 1 To X"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"trim",
+				"Trim Trailing White Space"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"perfer",
+				"Preferences: Settings"
+			],
 			[
 				"save",
 				"Project: Save As"
@@ -130,10 +162,6 @@
 			[
 				"uni",
 				"Permute Lines: Unique"
-			],
-			[
-				"rein",
-				"Indentation: Reindent Lines"
 			]
 		],
 		"width": 0.0
@@ -160,6 +188,9 @@
 	],
 	"file_history":
 	[
+		"/Users/parker_ly/Workspace/gotest/main.go",
+		"/Users/parker_ly/Workspace/gotest/models.go",
+		"/Users/parker_ly/Workspace/gotest/go.mod",
 		"/Users/parker_ly/Workspace/pod-mobile/ios/Podfile",
 		"/Users/parker_ly/.zshrc",
 		"/Users/parker_ly/.oh-my-zsh/oh-my-zsh.sh",
@@ -181,6 +212,16 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"pass",
+			"user",
+			"uint",
+			"Product",
+			"id",
+			"r",
+			"POST",
+			"user",
+			"message",
+			"    \n"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -258,6 +299,14 @@
 		"selected_items":
 		[
 			[
+				"mod",
+				"go.mod"
+			],
+			[
+				"",
+				"go.mod"
+			],
+			[
 				"oh-my-zsh.sh",
 				".oh-my-zsh/oh-my-zsh.sh"
 			]
@@ -289,7 +338,7 @@
 	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 276.0,
 	"status_bar_visible": true,
 	"template_settings":
