@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"gotest/main/models"
 )
@@ -24,11 +25,10 @@ func NewUserController(db *gorm.DB) *UserController {
 	}
 }
 
-func (controller *UserController) Get() *UserControllerGetResponse {
-	var user models.User
-	controller.db.First(&user)
+func (controller *UserController) Get(c *gin.Context) *UserControllerGetResponse {
+	user, _ := c.Get(identityKey)
 	return &UserControllerGetResponse{
-		Username: user.Username,
+		Username: user.(*User).UserName,
 	}
 }
 

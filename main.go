@@ -15,8 +15,8 @@ func MiddleWare() gin.HandlerFunc {
 		switch c.Request.Header.Get("Accept") {
 		case "application/json":
 		default:
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "error",
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "Only Accepting JSON",
 			})
 		}
 	}
@@ -59,23 +59,11 @@ func main() {
 	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	var userController = NewUserController(db)
 	{
-		apiV1.GET("/user", func(c *gin.Context) {
-			var data = userController.Get()
+		apiV1.GET("/profile", func(c *gin.Context) {
+			var data = userController.Get(c)
 			c.JSON(http.StatusOK, gin.H{
 				"data": *data,
 			})
-		})
-		apiV1.POST("/user", func(c *gin.Context) {
-			var data = userController.Post()
-			if data == nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"code": http.StatusBadRequest,
-				})
-			} else {
-				c.JSON(http.StatusOK, gin.H{
-					"data": *data,
-				})
-			}
 		})
 
 		apiV1.GET("/wallet", func(c *gin.Context) {
