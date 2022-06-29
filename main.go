@@ -24,7 +24,8 @@ func MiddleWare() gin.HandlerFunc {
 
 func main() {
 	argsWithoutProg := os.Args[1:]
-	dsn := "root:password@tcp(127.0.0.1:3306)/CODEACADEMY?charset=utf8mb4&parseTime=True&loc=Local"
+	var DbHost = os.Getenv("DB_HOST")
+	dsn := "root:password@tcp(" + DbHost + ":3306)/CODEACADEMY?charset=utf8mb4&parseTime=True&loc=Local"
 	if len(argsWithoutProg) >= 1 && argsWithoutProg[0] == "migrate" {
 		db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		db.AutoMigrate(&models.User{})

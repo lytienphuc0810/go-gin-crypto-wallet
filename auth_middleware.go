@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gotest/main/models"
+	"os"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -55,7 +56,8 @@ func GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			fmt.Print(loginVals)
 
 			var user models.User
-			dsn := "root:password@tcp(127.0.0.1:3306)/CODEACADEMY?charset=utf8mb4&parseTime=True&loc=Local"
+			var DbHost = os.Getenv("DB_HOST")
+			dsn := "root:password@tcp(" + DbHost + ":3306)/CODEACADEMY?charset=utf8mb4&parseTime=True&loc=Local"
 			db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 			result := db.Where("username = ?", loginVals.Username).First(&user)
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
