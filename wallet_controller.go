@@ -159,7 +159,7 @@ func (controller *WalletController) AddPosition(c *gin.Context) interface{} {
 
 	token := c.Param("token")
 	var tokenModel models.Token
-	result = controller.db.Where("symbol = ? AND wallet_id", token, walletID).First(&tokenModel)
+	result = controller.db.Where("symbol = ? AND wallet_id = ?", token, walletID).First(&tokenModel)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		log.Panicln(result.Error.Error())
 	}
