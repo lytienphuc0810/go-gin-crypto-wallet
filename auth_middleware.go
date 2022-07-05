@@ -3,10 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gotest/main/models"
-	"os"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -27,7 +25,7 @@ type User struct {
 	LastName  string
 }
 
-func GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
+func GetAuthMiddleware(db *gorm.DB) (*jwt.GinJWTMiddleware, error) {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte("secret key"),
@@ -56,9 +54,6 @@ func GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 			fmt.Print(loginVals)
 
 			var user models.User
-			var DbHost = os.Getenv("DB_HOST")
-			dsn := "root:password@tcp(" + DbHost + ":3306)/CODEACADEMY?charset=utf8mb4&parseTime=True&loc=Local"
-			db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 			result := db.Where("username = ?", loginVals.Username).First(&user)
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				return nil, jwt.ErrFailedAuthentication
@@ -68,8 +63,6 @@ func GetAuthMiddleware() (*jwt.GinJWTMiddleware, error) {
 				LastName:  user.Username,
 				FirstName: user.Username,
 			}, nil
-
-			return nil, jwt.ErrFailedAuthentication
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			// ROLE BASED

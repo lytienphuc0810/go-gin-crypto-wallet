@@ -26,8 +26,8 @@ func main() {
 	argsWithoutProg := os.Args[1:]
 	var DbHost = os.Getenv("DB_HOST")
 	dsn := "root:password@tcp(" + DbHost + ":3306)/CODEACADEMY?charset=utf8mb4&parseTime=True&loc=Local"
+	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if len(argsWithoutProg) >= 1 && argsWithoutProg[0] == "migrate" {
-		db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		db.AutoMigrate(&models.User{})
 		db.AutoMigrate(&models.Wallet{})
 		db.AutoMigrate(&models.Token{})
@@ -52,7 +52,7 @@ func main() {
 	}
 
 	r := gin.Default()
-	authMidlw, err := initJWTAuth(r)
+	authMidlw, err := initJWTAuth(r, db)
 	if err != nil {
 		log.Fatal(err.Error())
 		return
@@ -60,7 +60,6 @@ func main() {
 
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(MiddleWare(), authMidlw)
-	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	var userController = NewUserController(db)
 	var walletController = NewWalletController(db)
 
@@ -119,8 +118,8 @@ func main() {
  * /login
  * /auth/refresh_token
  */
-func initJWTAuth(r *gin.Engine) (gin.HandlerFunc, error) {
-	authMiddleware, err := GetAuthMiddleware()
+func initJWTAuth(r *gin.Engine, db *gorm.DB) (gin.HandlerFunc, error) {
+	authMiddleware, err := GetAuthMiddleware(db)
 	if err != nil {
 		log.Fatal("JWT Error:" + err.Error())
 		return nil, err
